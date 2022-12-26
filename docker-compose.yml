@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  frontend:
+    container_name: frontend
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    image: proyecto-admin_frontend
+    stdin_open: true
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+  backend:
+    container_name: backend
+    restart: always
+    build:
+      context: ./
+      dockerfile: Dockerfile.backend
+    image: proyecto-admin_backend
+    ports:
+      - "5000:5000"
+    links:
+      - mongo
+    environment:
+      - MONGODB_URI=mongodb://mongo/proyecto-admin
+      - SECRET_KEY=S3cr3tKey
+      - SALT_ITERATION=12
+    depends_on:
+      - mongo
+    networks:
+      - mongo-network
+  mongo:
+    container_name: mongodb
+    restart: always
+    image: mongo
+    ports:
+      - "27018:27017"
+    logging:
+      driver: none
+    networks:
+      - mongo-network
+
+networks:
+  mongo-network:
+    driver: bridge
